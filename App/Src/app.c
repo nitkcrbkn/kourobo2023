@@ -14,8 +14,8 @@
 
 static
 int suspensionSystem(void);
-
-
+static
+int armSystem(void);
 
 /* 腕振り部の変数 */
 int situation = 0;
@@ -119,7 +119,7 @@ int suspensionSystem(void){
     checkpush = 1;
     }
   
-
+/*
   if(__RC_ISPRESSED_TRIANGLE(g_rc_data) && checkpush == 1 && !__RC_ISPRESSED_CROSS(g_rc_data)){
 	    
     switch(mode){
@@ -132,7 +132,7 @@ int suspensionSystem(void){
     }
 	    
     checkpush = 0;
-  }
+  }*/
 
   
     /*for each motor*/
@@ -158,4 +158,27 @@ int suspensionSystem(void){
   return EXIT_SUCCESS;
 }
 
+static
+int armSystem(void){
+  unsigned int idx;/*インデックス*/
+  int i;
+  int duty;
+
+  const tc_const_t tc ={
+    .inc_con = 100,
+    .dec_con = 225,
+  };
+
+  if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
+    duty=3000;
+  }
+  else if(__RC_ISPRESSED_CROSS(g_rc_data)){
+    duty=-3000;
+  }else{
+    duty=0;
+  }
+  for(idx=2;idx<=3;idx++){
+  trapezoidCtrl(duty,&g_md_h[idx],&tc);
+  }
+}
 

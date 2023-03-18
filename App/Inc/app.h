@@ -4,7 +4,7 @@
 /*NO Device mode*/
 #define _NO_DEVICE 0
 
-#define DD_NUM_OF_MD 3
+#define DD_NUM_OF_MD 2
 #define DD_NUM_OF_AB 0
 #define DD_NUM_OF_SV 0
 
@@ -24,7 +24,7 @@ int appInit(void);
 //#define MECHA1_MD7 7
 /* 上部回転用モータ */
 //#define MECHA1_MD4 4
-
+ 
 #define CENTRAL_THRESHOLD 0
 
 #define MD_GAIN (DD_MD_MAX_DUTY  / DD_RC_ANALOG_MAX / 2 )

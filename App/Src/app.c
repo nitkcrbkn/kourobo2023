@@ -167,7 +167,7 @@ int suspensionSystem(void){
 
 static
 int upDownSystem(void){
-    unsigned int idx;/*インデックス*/
+    unsigned int idx = 2;/*インデックス*/
     int i;
     int duty;
 

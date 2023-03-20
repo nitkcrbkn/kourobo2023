@@ -92,9 +92,16 @@ int appTask(void){
   /*それぞれの機構ごとに処理をする*/
   /*途中必ず定数回で終了すること。*/
   ret = suspensionSystem();
+
   if(ret){
     return ret;
   }
+
+    ret = armSystem();
+
+    if(ret){
+        return ret;
+    }
 
 	 
   return EXIT_SUCCESS;
@@ -180,5 +187,6 @@ int armSystem(void){
   for(idx=2;idx<=3;idx++){
   trapezoidCtrl(duty,&g_md_h[idx],&tc);
   }
+return EXIT_SUCCESS;
 }
 

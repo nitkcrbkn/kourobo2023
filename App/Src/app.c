@@ -14,8 +14,8 @@
 
 static
 int suspensionSystem(void);
-
-
+static
+int armSystem(void);
 
 /* 腕振り部の変数 */
 int situation = 0;
@@ -80,24 +80,30 @@ int appInit(void){
 
 /*application tasks*/
 int appTask(void){
-    int ret=0;
+  int ret=0;
 
-    /*if(__RC_ISPRESSED_R1(g_rc_data)&&__RC_ISPRESSED_R2(g_rc_data)&&
-       __RC_ISPRESSED_L1(g_rc_data)&&__RC_ISPRESSED_L2(g_rc_data)){
-      while(__RC_ISPRESSED_R1(g_rc_data)||__RC_ISPRESSED_R2(g_rc_data)||
-        __RC_ISPRESSED_L1(g_rc_data)||__RC_ISPRESSED_L2(g_rc_data));
-      ad_main();
-      }*/
+  /*if(__RC_ISPRESSED_R1(g_rc_data)&&__RC_ISPRESSED_R2(g_rc_data)&&
+     __RC_ISPRESSED_L1(g_rc_data)&&__RC_ISPRESSED_L2(g_rc_data)){
+    while(__RC_ISPRESSED_R1(g_rc_data)||__RC_ISPRESSED_R2(g_rc_data)||
+	  __RC_ISPRESSED_L1(g_rc_data)||__RC_ISPRESSED_L2(g_rc_data));
+    ad_main();
+    }*/
+	 
+  /*それぞれの機構ごとに処理をする*/
+  /*途中必ず定数回で終了すること。*/
+  ret = suspensionSystem();
 
-    /*それぞれの機構ごとに処理をする*/
-    /*途中必ず定数回で終了すること。*/
-    ret = suspensionSystem();
-    if(ret){
-        return ret;
-    }
+  if(ret){
+    return ret;
+  }
 
-
-    return EXIT_SUCCESS;
+  ret = armSystem();
+    
+  if(ret){
+    return ret;
+  }
+	 
+  return EXIT_SUCCESS;
 }
 
 
@@ -118,21 +124,21 @@ int suspensionSystem(void){
     if(!__RC_ISPRESSED_TRIANGLE(g_rc_data)){
         checkpush = 1;
     }
-
-
-    if(__RC_ISPRESSED_TRIANGLE(g_rc_data) && checkpush == 1 && !__RC_ISPRESSED_CROSS(g_rc_data)){
-
-        switch(mode){
-            case 1:
-                mode = 0;
-                break;
-            case 0:
-                mode = 1;
-                break;
-        }
-
-        checkpush = 0;
+ 
+/*
+  if(__RC_ISPRESSED_TRIANGLE(g_rc_data) && checkpush == 1 && !__RC_ISPRESSED_CROSS(g_rc_data)){
+	    
+    switch(mode){
+    case 1:
+      mode = 0;
+      break;
+    case 0:
+      mode = 1;
+      break;
     }
+	    
+    checkpush = 0;
+  }*/
 
 
     /*for each motor*/
@@ -158,3 +164,28 @@ int suspensionSystem(void){
     return EXIT_SUCCESS;
 }
 
+
+static
+int armSystem(void){
+  unsigned int idx;/*インデックス*/
+  int i;
+  int duty;
+
+  const tc_const_t tc ={
+    .inc_con = 100,
+    .dec_con = 225,
+  };
+
+  if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
+    duty=3000;
+  }
+  else if(__RC_ISPRESSED_CROSS(g_rc_data)){
+    duty=-3000;
+  }else{
+    duty=0;
+  }
+  for(idx=2;idx<=3;idx++){
+  trapezoidCtrl(duty,&g_md_h[idx],&tc);
+  }
+return EXIT_SUCCESS;
+}

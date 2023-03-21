@@ -177,10 +177,10 @@ int armSystem(void){
   };
 
   if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
-    duty=3000;
+    duty=1000;
   }
   else if(__RC_ISPRESSED_CROSS(g_rc_data)){
-    duty=-3000;
+    duty=-1000;
   }else{
     duty=0;
   }

@@ -11,6 +11,14 @@
 #include "trapezoid_ctrl.h"
 /*suspensionSystem*/
 
+/*アーム関連の定数*/
+#define OUT_LIMIT 120000 /*duty値と時間(10ms単位)の積*/
+#define IN_LIMIT 0 /*同上*/
+#define AUTO_ARM_WIDTH 100
+#define MOTOR_SPEED_AMR 1000
+
+
+
 
 static
 int suspensionSystem(void);
@@ -182,28 +190,28 @@ int armSystem(void){
 
     if(flagAutoArm > 0){ /*開く動作中ならtrue*/
         flagAutoArm -= 1;
-        duty = 1000;
+        duty = MOTOR_SPEED_AMR;
     }
     else if(flagAutoArm < 0){ /*閉じる動作中ならture*/
         flagAutoArm += 1;
-        duty = -1000;
+        duty = MOTOR_SPEED_AMR * -1;
     }
     else{
         if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
             flagAutoArm = 0;
-            duty=1000;
+            duty= MOTOR_SPEED_AMR;
         }
         else if(__RC_ISPRESSED_CROSS(g_rc_data)){
             flagAutoArm = 0;
-            duty=-1000;
+            duty = MOTOR_SPEED_AMR * -1;
         }
         else if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
-            flagAutoArm = 100;
-            duty = 1000;
+            flagAutoArm = AUTO_ARM_WIDTH;
+            duty = MOTOR_SPEED_AMR;
         }
         else if(__RC_ISPRESSED_SQARE(g_rc_data)){
-            flagAutoArm = -100;
-            duty = -1000;
+            flagAutoArm = AUTO_ARM_WIDTH * -1;
+            duty = MOTOR_SPEED_AMR * -1;
         }
         else{
             flagAutoArm = 0;

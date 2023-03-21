@@ -17,9 +17,6 @@ int suspensionSystem(void);
 static
 int armSystem(void);
 
-static
-int autoArmSystem(void);
-
 
 
 /* 腕振り部の変数 */
@@ -108,11 +105,6 @@ int appTask(void){
     return ret;
   }
 
-  ret = autoArmSystem();
-  if(ret){
-      return ret;
-  }
-
 
   return EXIT_SUCCESS;
 }
@@ -178,39 +170,14 @@ int suspensionSystem(void){
 
 static
 int armSystem(void){
-  unsigned int idx;/*インデックス*/
-  int i;
-  int duty;
-
-  const tc_const_t tc ={
-    .inc_con = 100,
-    .dec_con = 225,
-  };
-
-  if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
-    duty=1000;
-  }
-  else if(__RC_ISPRESSED_CROSS(g_rc_data)){
-    duty=-1000;
-  }else{
-    duty=0;
-  }
-  for(idx=2;idx<=3;idx++){
-  trapezoidCtrl(duty,&g_md_h[idx],&tc);
-  }
-return EXIT_SUCCESS;
-}
-
-static
-int autoArmSystem(void){
-    unsigned int idx = 2;/*インデックス*/
+    unsigned int idx;/*インデックス*/
     int i;
     int duty;
-    static int flagAutoArm = 0; /*正なら開く動作、負なら閉じる動作を示す*/
+    static int flagAutoArm = 0;  /*正なら開く動作、負なら閉じる動作を示す*/
 
     const tc_const_t tc ={
-            .inc_con = 100,
-            .dec_con = 225,
+        .inc_con = 100,
+        .dec_con = 225,
     };
 
     if(flagAutoArm > 0){ /*開く動作中ならtrue*/
@@ -222,7 +189,15 @@ int autoArmSystem(void){
         duty = -1000;
     }
     else{
-        if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
+        if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
+            flagAutoArm = 0;
+            duty=1000;
+        }
+        else if(__RC_ISPRESSED_CROSS(g_rc_data)){
+            flagAutoArm = 0;
+            duty=-1000;
+        }
+        else if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
             flagAutoArm = 100;
             duty = 1000;
         }
@@ -236,7 +211,8 @@ int autoArmSystem(void){
         }
     }
 
-    trapezoidCtrl(duty,&g_md_h[idx],&tc);
-
+    for(idx=2;idx<=3;idx++){
+        trapezoidCtrl(duty,&g_md_h[idx],&tc);
+    }
     return EXIT_SUCCESS;
 }

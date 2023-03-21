@@ -166,7 +166,7 @@ int suspensionSystem(void){
 	return EXIT_FAILURE;
       }
       trapezoidCtrl(rc_analogdata * MD_GAIN,&g_md_h[idx],&tc);
-    }
+   }
 
 
     return EXIT_SUCCESS;
@@ -185,10 +185,10 @@ int armSystem(void){
   };
 
   if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
-    duty=3000;
+    duty=1000;
   }
   else if(__RC_ISPRESSED_CROSS(g_rc_data)){
-    duty=-3000;
+    duty=-1000;
   }else{
     duty=0;
   }

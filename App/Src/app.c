@@ -15,6 +15,9 @@
 static
 int suspensionSystem(void);
 
+static
+int autoArmSystem(void);
+
 
 
 /* 腕振り部の変数 */
@@ -96,6 +99,11 @@ int appTask(void){
     return ret;
   }
 
+  ret = autoArmSystem();
+  if(ret){
+      return ret;
+  }
+
 	 
   return EXIT_SUCCESS;
 }
@@ -158,4 +166,42 @@ int suspensionSystem(void){
   return EXIT_SUCCESS;
 }
 
+static
+int autoArmSystem(void){
+    unsigned int idx = 2;/*インデックス*/
+    int i;
+    int duty;
+    static int flagAutoArm = 0; /*正なら開く動作、負なら閉じる動作を示す*/
 
+    const tc_const_t tc ={
+            .inc_con = 100,
+            .dec_con = 225,
+    };
+
+    if(flagAutoArm > 0){ /*開く動作中ならtrue*/
+        flagAutoArm -= 1;
+        duty = 1000;
+    }
+    else if(flagAutoArm < 0){ /*閉じる動作中ならture*/
+        flagAutoArm += 1;
+        duty = -1000;
+    }
+    else{
+        if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
+            flagAutoArm = 100;
+            duty = 1000;
+        }
+        else if(__RC_ISPRESSED_SQARE(g_rc_data)){
+            flagAutoArm = -100;
+            duty = -1000;
+        }
+        else{
+            flagAutoArm = 0;
+            duty = 0;
+        }
+    }
+
+    trapezoidCtrl(duty,&g_md_h[idx],&tc);
+
+    return EXIT_SUCCESS;
+}

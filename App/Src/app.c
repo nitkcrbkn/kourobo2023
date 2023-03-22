@@ -182,6 +182,7 @@ int armSystem(void){
     int i;
     int duty;
     static int flagAutoArm = 0;  /*正なら開く動作、負なら閉じる動作を示す*/
+    static int limiter = 0;
 
     const tc_const_t tc ={
         .inc_con = 100,

@@ -22,10 +22,9 @@
 
 static
 int suspensionSystem(void);
+
 static
 int armSystem(void);
-
-
 
 /* 腕振り部の変数 */
 int situation = 0;
@@ -50,47 +49,47 @@ flashError_t checkFlashWrite(void){
 }
 
 int appInit(void){
-    message("msg","hell");
+  message("msg","hell");
 
-    /* switch(checkFlashWrite()){ */
-    /* case MW_FLASH_OK: */
-    /*   message("msg","FLASH WRITE TEST SUCCESS\n%s",(const char*)WRITE_ADDR); */
-    /*   break; */
-    /* case MW_FLASH_LOCK_FAILURE: */
-    /*   message("err","FLASH WRITE TEST LOCK FAILURE\n"); */
-    /*   break; */
-    /* case MW_FLASH_UNLOCK_FAILURE: */
-    /*   message("err","FLASH WRITE TEST UNLOCK FAILURE\n"); */
-    /*   break; */
-    /* case MW_FLASH_ERASE_VERIFY_FAILURE: */
-    /*   message("err","FLASH ERASE VERIFY FAILURE\n"); */
-    /*   break; */
-    /* case MW_FLASH_ERASE_FAILURE: */
-    /*   message("err","FLASH ERASE FAILURE\n"); */
-    /*   break; */
-    /* case MW_FLASH_WRITE_VERIFY_FAILURE: */
-    /*   message("err","FLASH WRITE TEST VERIFY FAILURE\n"); */
-    /*   break; */
-    /* case MW_FLASH_WRITE_FAILURE: */
-    /*   message("err","FLASH WRITE TEST FAILURE\n"); */
-    /*   break;         */
-    /* default: */
-    /*   message("err","FLASH WRITE TEST UNKNOWN FAILURE\n"); */
-    /*   break; */
-    /* } */
-    /* flush(); */
+  /* switch(checkFlashWrite()){ */
+  /* case MW_FLASH_OK: */
+  /*   message("msg","FLASH WRITE TEST SUCCESS\n%s",(const char*)WRITE_ADDR); */
+  /*   break; */
+  /* case MW_FLASH_LOCK_FAILURE: */
+  /*   message("err","FLASH WRITE TEST LOCK FAILURE\n"); */
+  /*   break; */
+  /* case MW_FLASH_UNLOCK_FAILURE: */
+  /*   message("err","FLASH WRITE TEST UNLOCK FAILURE\n"); */
+  /*   break; */
+  /* case MW_FLASH_ERASE_VERIFY_FAILURE: */
+  /*   message("err","FLASH ERASE VERIFY FAILURE\n"); */
+  /*   break; */
+  /* case MW_FLASH_ERASE_FAILURE: */
+  /*   message("err","FLASH ERASE FAILURE\n"); */
+  /*   break; */
+  /* case MW_FLASH_WRITE_VERIFY_FAILURE: */
+  /*   message("err","FLASH WRITE TEST VERIFY FAILURE\n"); */
+  /*   break; */
+  /* case MW_FLASH_WRITE_FAILURE: */
+  /*   message("err","FLASH WRITE TEST FAILURE\n"); */
+  /*   break;         */
+  /* default: */
+  /*   message("err","FLASH WRITE TEST UNKNOWN FAILURE\n"); */
+  /*   break; */
+  /* } */
+  /* flush(); */
 
-    ad_init();
+  ad_init();
 
-    message("msg","plz confirm\n%d\n",g_adjust.rightadjust.value);
+  message("msg","plz confirm\n%d\n",g_adjust.rightadjust.value);
 
-    /*GPIO の設定などでMW,GPIOではHALを叩く*/
-    return EXIT_SUCCESS;
+  /*GPIO の設定などでMW,GPIOではHALを叩く*/
+  return EXIT_SUCCESS;
 }
 
 /*application tasks*/
 int appTask(void){
-  int ret=0;
+    int ret=0;
 
   /*if(__RC_ISPRESSED_R1(g_rc_data)&&__RC_ISPRESSED_R2(g_rc_data)&&
      __RC_ISPRESSED_L1(g_rc_data)&&__RC_ISPRESSED_L2(g_rc_data)){
@@ -112,7 +111,6 @@ int appTask(void){
   if(ret){
     return ret;
   }
-
 
   return EXIT_SUCCESS;
 }
@@ -138,7 +136,7 @@ int suspensionSystem(void){
 
 /*
   if(__RC_ISPRESSED_TRIANGLE(g_rc_data) && checkpush == 1 && !__RC_ISPRESSED_CROSS(g_rc_data)){
-	    
+
     switch(mode){
     case 1:
       mode = 0;
@@ -147,29 +145,29 @@ int suspensionSystem(void){
       mode = 1;
       break;
     }
-	    
-    checkpush = 0;
-  }*/
 
+    checkpush = 0;
+  }
+*/
 
     /*for each motor*/
     for(i=0;i<num_of_motor;i++){
-        /*それぞれの差分*/
-        switch(i){
-            case 0:
-                idx = MECHA1_MD0;
-                rc_analogdata = DD_RCGetRY(g_rc_data);
-                break;
-            case 1:
-                idx = MECHA1_MD1;
-                rc_analogdata = -DD_RCGetLY(g_rc_data);
-                break;
+      /*それぞれの差分*/
+      switch(i){
+      case 0:
+	idx = MECHA1_MD0;
+	rc_analogdata = DD_RCGetRY(g_rc_data);
+	break;
+      case 1:
+	idx = MECHA1_MD1;
+	rc_analogdata = -DD_RCGetLY(g_rc_data);
+	break;
 
-            default:
-                return EXIT_FAILURE;
-        }
-        trapezoidCtrl(rc_analogdata * MD_GAIN,&g_md_h[idx],&tc);
-    }
+      default:
+	return EXIT_FAILURE;
+      }
+      trapezoidCtrl(rc_analogdata * MD_GAIN,&g_md_h[idx],&tc);
+   }
 
 
     return EXIT_SUCCESS;
@@ -219,8 +217,8 @@ int armSystem(void){
         }
     }
 
-    for(idx=2;idx<=3;idx++){
-        trapezoidCtrl(duty,&g_md_h[idx],&tc);
+    for(idx=0;idx<=1;idx++){
+        trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
     }
     return EXIT_SUCCESS;
 }

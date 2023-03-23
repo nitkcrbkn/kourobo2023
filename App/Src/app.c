@@ -11,20 +11,16 @@
 #include "trapezoid_ctrl.h"
 /*suspensionSystem*/
 
-/*アーム関連の定数*/
-#define OUT_LIMIT 120000 /*duty値と時間(10ms単位)の積*/
-#define IN_LIMIT 0 /*同上*/
-#define AUTO_ARM_WIDTH 250
-#define MOTOR_SPEED_AMR 1000
-
-
-
 
 static
 int suspensionSystem(void);
 
 static
 int armSystem(void);
+
+static
+int upDownSystem(void);
+
 
 /* 腕振り部の変数 */
 int situation = 0;
@@ -43,9 +39,9 @@ int checkpush = 0;
 
 #define WRITE_ADDR (const void*)(0x8000000+0x400*(128-1))/*128[KiB]*/
 flashError_t checkFlashWrite(void){
-    const char data[]="HelloWorld!!TestDatas!!!\n"
-                      "however you like this microcomputer, you don`t be kind to this computer.";
-    return MW_flashWrite(data,WRITE_ADDR,sizeof(data));
+  const char data[]="HelloWorld!!TestDatas!!!\n"
+    "however you like this microcomputer, you don`t be kind to this computer.";
+  return MW_flashWrite(data,WRITE_ADDR,sizeof(data));
 }
 
 int appInit(void){
@@ -97,17 +93,20 @@ int appTask(void){
 	  __RC_ISPRESSED_L1(g_rc_data)||__RC_ISPRESSED_L2(g_rc_data));
     ad_main();
     }*/
-	 
+
   /*それぞれの機構ごとに処理をする*/
   /*途中必ず定数回で終了すること。*/
   ret = suspensionSystem();
+  if(ret){
+    return ret;
+  }
 
+  ret = upDownSystem();
   if(ret){
     return ret;
   }
 
   ret = armSystem();
-
   if(ret){
     return ret;
   }
@@ -176,49 +175,52 @@ int suspensionSystem(void){
 
 static
 int armSystem(void){
-    unsigned int idx;/*インデックス*/
+  unsigned int idx;/*インデックス*/
+  int i;
+  int duty;
+
+  const tc_const_t tc ={
+    .inc_con = 100,
+    .dec_con = 225,
+  };
+
+  if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
+    duty=1000;
+  }
+  else if(__RC_ISPRESSED_CROSS(g_rc_data)){
+    duty=-1000;
+  }else{
+    duty=0;
+  }
+
+  for(idx=0;idx<=1;idx++){
+    trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
+  }
+  return EXIT_SUCCESS;
+}
+
+static
+int upDownSystem(void){
+    unsigned int idx = 4;/*インデックス*/
     int i;
     int duty;
-    static int flagAutoArm = 0;  /*正なら開く動作、負なら閉じる動作を示す*/
 
     const tc_const_t tc ={
-        .inc_con = 100,
-        .dec_con = 225,
+            .inc_con = 100,
+            .dec_con = 225,
     };
 
-    if(flagAutoArm > 0){ /*開く動作中ならtrue*/
-        flagAutoArm -= 1;
-        duty = MOTOR_SPEED_AMR;
+    if(__RC_ISPRESSED_UP(g_rc_data)){
+        duty = 3000;
     }
-    else if(flagAutoArm < 0){ /*閉じる動作中ならture*/
-        flagAutoArm += 1;
-        duty = MOTOR_SPEED_AMR * -1;
+    else if(__RC_ISPRESSED_DOWN(g_rc_data)){
+        duty = -3000;
     }
     else{
-        if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
-            flagAutoArm = 0;
-            duty= MOTOR_SPEED_AMR;
-        }
-        else if(__RC_ISPRESSED_CROSS(g_rc_data)){
-            flagAutoArm = 0;
-            duty = MOTOR_SPEED_AMR * -1;
-        }
-        else if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
-            flagAutoArm = AUTO_ARM_WIDTH;
-            duty = MOTOR_SPEED_AMR;
-        }
-        else if(__RC_ISPRESSED_SQARE(g_rc_data)){
-            flagAutoArm = AUTO_ARM_WIDTH * -1;
-            duty = MOTOR_SPEED_AMR * -1;
-        }
-        else{
-            flagAutoArm = 0;
-            duty = 0;
-        }
+        duty = 0;
     }
 
-    for(idx=0;idx<=1;idx++){
-        trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
-    }
+
+    trapezoidCtrl(duty,&g_md_h[idx],&tc);
     return EXIT_SUCCESS;
 }

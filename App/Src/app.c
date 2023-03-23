@@ -14,7 +14,7 @@
 /*アーム関連の定数*/
 #define OUT_LIMIT 120000 /*duty値と時間(10ms単位)の積*/
 #define IN_LIMIT 0 /*同上*/
-#define AUTO_ARM_WIDTH 100
+#define AUTO_ARM_WIDTH 250
 #define MOTOR_SPEED_AMR 1000
 
 

@@ -192,10 +192,11 @@ int armSystem(void){
   }else{
     duty=0;
   }
-  for(idx=2;idx<=3;idx++){
-    trapezoidCtrl(duty,&g_md_h[idx],&tc);
+
+  for(idx=0;idx<=1;idx++){
+    trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
   }
-return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
 
 static
@@ -210,10 +211,10 @@ int upDownSystem(void){
     };
 
     if(__RC_ISPRESSED_UP(g_rc_data)){
-        duty = 1000;
+        duty = 3000;
     }
     else if(__RC_ISPRESSED_DOWN(g_rc_data)){
-        duty = -1000;
+        duty = -3000;
     }
     else{
         duty = 0;
@@ -221,5 +222,5 @@ int upDownSystem(void){
 
 
     trapezoidCtrl(duty,&g_md_h[idx],&tc);
-
+    return EXIT_SUCCESS;
 }

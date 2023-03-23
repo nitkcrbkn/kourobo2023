@@ -24,7 +24,10 @@ static
 int suspensionSystem(void);
 
 static
-int armSystem(void);
+int armR(void);
+
+static
+int armL(void);
 
 /* 腕振り部の変数 */
 int situation = 0;
@@ -175,50 +178,51 @@ int suspensionSystem(void){
 
 
 static
-int armSystem(void){
-    unsigned int idx;/*インデックス*/
+int armR(void){
+    unsigned int idx = 2;/*インデックス*/
     int i;
     int duty;
-    static int flagAutoArm = 0;  /*正なら開く動作、負なら閉じる動作を示す*/
 
     const tc_const_t tc ={
         .inc_con = 100,
         .dec_con = 225,
     };
 
-    if(flagAutoArm > 0){ /*開く動作中ならtrue*/
-        flagAutoArm -= 1;
-        duty = MOTOR_SPEED_AMR;
+    if(__RC_ISPRESSED_R1(g_rc_data)){
+      duty = MOTOR_SPEED_AMR;
     }
-    else if(flagAutoArm < 0){ /*閉じる動作中ならture*/
-        flagAutoArm += 1;
-        duty = MOTOR_SPEED_AMR * -1;
+    else if(__RC_ISPRESSED_R2(g_rc_data)){
+      duty = MOTOR_SPEED_AMR * -1;
     }
     else{
-        if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
-            flagAutoArm = 0;
-            duty= MOTOR_SPEED_AMR;
-        }
-        else if(__RC_ISPRESSED_CROSS(g_rc_data)){
-            flagAutoArm = 0;
-            duty = MOTOR_SPEED_AMR * -1;
-        }
-        else if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
-            flagAutoArm = AUTO_ARM_WIDTH;
-            duty = MOTOR_SPEED_AMR;
-        }
-        else if(__RC_ISPRESSED_SQARE(g_rc_data)){
-            flagAutoArm = AUTO_ARM_WIDTH * -1;
-            duty = MOTOR_SPEED_AMR * -1;
-        }
-        else{
-            flagAutoArm = 0;
-            duty = 0;
-        }
+      duty = 0;
     }
 
-    for(idx=0;idx<=1;idx++){
-        trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
+    trapezoidCtrl(duty,&g_md_h[idx],&tc);
+    return EXIT_SUCCESS;
+}
+
+static
+int armL(void){
+    unsigned int idx = 3;/*インデックス*/
+    int i;
+    int duty;
+
+    const tc_const_t tc ={
+        .inc_con = 100,
+        .dec_con = 225,
+    };
+
+    if(__RC_ISPRESSED_L1(g_rc_data)){
+      duty = 1500;
     }
+    else if(__RC_ISPRESSED_L2(g_rc_data)){
+      duty = 1500 * -1;
+    }
+    else{
+      duty = 0;
+    }
+    
+    trapezoidCtrl(duty,&g_md_h[idx],&tc);
     return EXIT_SUCCESS;
 }

@@ -186,7 +186,7 @@ int armSystem(void){
     unsigned int idx;/*インデックス*/
     int i;
     int duty;
-    int flagMD; /*1番でどっちも、2番でMD2番、3番でMD3番*/
+    int flagMD=-1; /*1番でどっちも、2番でMD2番、3番でMD3番*/
     static int flagAutoArm = 0;  /*正なら開く動作、負なら閉じる動作を示す*/
 
     const tc_const_t tc ={
@@ -251,8 +251,20 @@ int armSystem(void){
             trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
         }
     }
+    else if(flagMD == 2){
+        for(idx=0;idx<=1;idx++){
+            trapezoidCtrl(duty * (idx-1) * -1,&g_md_h[idx+2],&tc);
+        }
+    }
+    else if(flagMD == 3){
+        for(idx=0;idx<=1;idx++){
+            trapezoidCtrl(duty * idx ,&g_md_h[idx+2],&tc);
+        }
+    }
     else{
-        trapezoidCtrl(duty,&g_md_h[flagMD],&tc);
+        for(idx=0;idx<=1;idx++){
+            trapezoidCtrl(0 ,&g_md_h[idx+2],&tc);
+        }
     }
 
     return EXIT_SUCCESS;

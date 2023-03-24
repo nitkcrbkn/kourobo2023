@@ -259,47 +259,42 @@ int armSystem(void){
 }
 
 static
-int upDownSystem(void){
+int upDownSystem(void) {
     unsigned int idx = 4;/*インデックス*/
     int i;
     int duty;
     static int flagAutoUpDown = 0;
 
-    const tc_const_t tc ={
+    const tc_const_t tc = {
             .inc_con = 100,
             .dec_con = 225,
     };
 
-    if(flagAutoUpDown > 0){ /*上昇中なら*/
+    if (flagAutoUpDown > 0) { /*上昇中なら*/
         flagAutoUpDown -= 1;
         duty = MOTOR_SPEED_UPDOWN;
-    }
-    else if(flagAutoUpDown < 0){ /*下昇中なら*/
+    } else if (flagAutoUpDown < 0) { /*下昇中なら*/
         flagAutoUpDown += 1;
         duty = MOTOR_SPEED_UPDOWN * -1;
-    }
-    else{
-        if(__RC_ISPRESSED_RIGHT(g_rc_data)){
+    } else {
+        if (__RC_ISPRESSED_RIGHT(g_rc_data)) {
             flagAutoUpDown = AUTO_UP;
             duty = MOTOR_SPEED_UPDOWN;
-        }
-        else if(__RC_ISPRESSED_LEFT(g_rc_data)){
+        } else if (__RC_ISPRESSED_LEFT(g_rc_data)) {
             flagAutoUpDown = AUTO_DOWN;
             duty = MOTOR_SPEED_UPDOWN * -1;
-        }
-        else if(__RC_ISPRESSED_UP(g_rc_data)){
+        } else if (__RC_ISPRESSED_UP(g_rc_data)) {
             flagAutoUpDown = 0;
             duty = MOTOR_SPEED_UPDOWN;
-        }
-        else if(__RC_ISPRESSED_DOWN(g_rc_data)){
+        } else if (__RC_ISPRESSED_DOWN(g_rc_data)) {
             flagAutoUpDown = 0;
             duty = MOTOR_SPEED_UPDOWN * -1;
-        }
-        else{
+        } else {
             duty = 0;
         }
     }
 
 
-    trapezoidCtrl(duty,&g_md_h[idx],&tc);
+    trapezoidCtrl(duty, &g_md_h[idx], &tc);
     return EXIT_SUCCESS;
+}

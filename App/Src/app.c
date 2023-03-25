@@ -186,7 +186,6 @@ int armSystem(void){
     unsigned int idx;/*インデックス*/
     int i;
     int duty;
-    int flagMD=-1; /*1番でどっちも、2番でMD2番、3番でMD3番*/
     static int flagAutoArm = 0;  /*正なら開く動作、負なら閉じる動作を示す*/
 
     const tc_const_t tc ={
@@ -195,76 +194,37 @@ int armSystem(void){
     };
 
     if(flagAutoArm > 0){ /*開く動作中ならtrue*/
-        flagMD = 1;
         flagAutoArm -= 1;
         duty = MOTOR_SPEED_AMR;
     }
     else if(flagAutoArm < 0){ /*閉じる動作中ならture*/
-        flagMD = 1;
         flagAutoArm += 1;
         duty = MOTOR_SPEED_AMR * -1;
     }
     else{
         if(__RC_ISPRESSED_CIRCLE(g_rc_data)){
-            flagMD = 1;
             flagAutoArm = 0;
             duty= MOTOR_SPEED_AMR;
         }
         else if(__RC_ISPRESSED_CROSS(g_rc_data)){
-            flagMD = 1;
             flagAutoArm = 0;
             duty = MOTOR_SPEED_AMR * -1;
         }
         else if(__RC_ISPRESSED_TRIANGLE(g_rc_data)){
-            flagMD = 1;
             flagAutoArm = AUTO_ARM_WIDTH;
             duty = MOTOR_SPEED_AMR;
         }
         else if(__RC_ISPRESSED_SQARE(g_rc_data)){
-            flagMD = 1;
             flagAutoArm = AUTO_ARM_WIDTH * -1;
             duty = MOTOR_SPEED_AMR * -1;
-        }
-        else if(__RC_ISPRESSED_R1(g_rc_data)){
-            flagMD = 2;
-            duty = MOTOR_SPEED_AMR;
-        }
-        else if(__RC_ISPRESSED_R2(g_rc_data)){
-            flagMD = 2;
-            duty = MOTOR_SPEED_AMR * -1;
-        }
-        else if(__RC_ISPRESSED_L1(g_rc_data)){
-            flagMD = 3;
-            duty = MOTOR_SPEED_AMR * (1 + ARM_MAG);
-        }
-        else if(__RC_ISPRESSED_L2(g_rc_data)){
-            flagMD = 3;
-            duty = duty = MOTOR_SPEED_AMR * (1 + ARM_MAG) * -1;
         }
         else{
             flagAutoArm = 0;
             duty = 0;
         }
     }
-    if(flagMD == 1){
-        for(idx=0;idx<=1;idx++){
-            trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
-        }
-    }
-    else if(flagMD == 2){
-        for(idx=0;idx<=1;idx++){
-            trapezoidCtrl(duty * (idx-1) * -1,&g_md_h[idx+2],&tc);
-        }
-    }
-    else if(flagMD == 3){
-        for(idx=0;idx<=1;idx++){
-            trapezoidCtrl(duty * idx ,&g_md_h[idx+2],&tc);
-        }
-    }
-    else{
-        for(idx=0;idx<=1;idx++){
-            trapezoidCtrl(0 ,&g_md_h[idx+2],&tc);
-        }
+    for(idx=0;idx<=1;idx++){
+        trapezoidCtrl(duty*(0.5*idx + 1),&g_md_h[idx+2],&tc);
     }
 
     return EXIT_SUCCESS;
@@ -285,10 +245,12 @@ int upDownSystem(void) {
     if (flagAutoUpDown > 0) { /*上昇中なら*/
         flagAutoUpDown -= 1;
         duty = MOTOR_SPEED_UPDOWN;
-    } else if (flagAutoUpDown < 0) { /*下昇中なら*/
+    }
+    else if (flagAutoUpDown < 0) { /*下昇中なら*/
         flagAutoUpDown += 1;
         duty = MOTOR_SPEED_UPDOWN * -1;
-    } else {
+    }
+    else {
         if (__RC_ISPRESSED_RIGHT(g_rc_data)) {
             flagAutoUpDown = AUTO_UP;
             duty = MOTOR_SPEED_UPDOWN;
